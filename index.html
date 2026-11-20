@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simulador D'Hondt del Congreso</title>
+  <meta name="description" content="Simula el reparto de escaños del Congreso por circunscripción con la ley D'Hondt y compáralo con otros sistemas.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="top-inner">
+      <div class="brand">
+        <h1>Simulador D'Hondt</h1>
+        <p class="sub">Congreso de los Diputados · 350 escaños en 52 circunscripciones</p>
+      </div>
+      <div class="controls">
+        <label class="field">
+          <span>Elección base</span>
+          <select id="sel-eleccion"></select>
+        </label>
+        <label class="field">
+          <span>Sistema de reparto</span>
+          <select id="sel-metodo">
+            <option value="dhondt">D'Hondt (sistema real)</option>
+            <option value="sainte">Sainte-Laguë</option>
+            <option value="hare">Proporcional por provincia (Hare)</option>
+            <option value="nacional">Proporcional nacional (circunscripción única)</option>
+          </select>
+        </label>
+        <label class="field field-narrow">
+          <span>Umbral</span>
+          <span class="with-unit"><input id="inp-umbral" type="number" min="0" max="15" step="0.5" value="3"><em>%</em></span>
+        </label>
+        <button id="btn-reset-todo" class="btn btn-ghost" type="button">Restablecer todo</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="card resumen" aria-labelledby="h-resumen">
+      <div class="card-head">
+        <h2 id="h-resumen">Congreso simulado</h2>
+        <p id="resumen-nota" class="muted small"></p>
+      </div>
+      <div id="hemiciclo" class="hemiciclo" role="img" aria-label="Hemiciclo con el reparto simulado"></div>
+      <ul id="leyenda" class="leyenda"></ul>
+    </section>
+
+    <section class="card mapa" aria-labelledby="h-mapa">
+      <div class="card-head">
+        <h2 id="h-mapa">Circunscripciones</h2>
+        <div class="seg" role="radiogroup" aria-label="Qué muestra el mapa">
+          <button type="button" class="seg-btn" data-mapa="ganador" aria-pressed="true">Más votado</button>
+          <button type="button" class="seg-btn" data-mapa="cambios" aria-pressed="false">Cambios</button>
+          <button type="button" class="seg-btn" data-mapa="partido" aria-pressed="false">Voto de…</button>
+          <select id="sel-partido-mapa" aria-label="Partido para colorear el mapa" hidden></select>
+        </div>
+      </div>
+      <div id="mapa" class="mapa-svg"></div>
+      <p class="muted small">Cada casilla es una circunscripción (todas del mismo tamaño para que se vean bien las pequeñas). La franja inferior muestra sus escaños. Toca una para editar sus votos.</p>
+    </section>
+
+    <section class="card panel" aria-labelledby="h-prov" id="panel">
+      <!-- se rellena desde app.js -->
+    </section>
+
+    <section class="card comparativa" aria-labelledby="h-comp">
+      <div class="card-head">
+        <h2 id="h-comp">Con y sin D'Hondt</h2>
+        <p class="muted small">Mismos votos simulados, distintos sistemas. «Real» es el resultado oficial de la elección base.</p>
+      </div>
+      <div class="table-wrap"><table id="tabla" class="tabla"></table></div>
+    </section>
+
+    <section class="card explica" aria-labelledby="h-explica">
+      <h2 id="h-explica">Cómo funciona</h2>
+      <ol class="pasos">
+        <li>Cada provincia elige sus propios diputados (Ceuta y Melilla, uno cada una). Los votos no se suman entre provincias.</li>
+        <li>Solo entran en el reparto las candidaturas con al menos el 3 % de los votos válidos de la provincia (los votos en blanco cuentan como válidos).</li>
+        <li>Los votos de cada candidatura se dividen entre 1, 2, 3… y los escaños se dan a los cocientes más altos. Es la tabla que verás en cada provincia.</li>
+        <li>Como en las provincias pequeñas hay pocos escaños, el sistema favorece a los partidos más votados y a los que concentran su voto en un territorio.</li>
+      </ol>
+      <p class="muted small">Sainte-Laguë divide entre 1, 3, 5… y trata mejor a los partidos medianos. Hare reparte por cuota y restos mayores. La circunscripción única nacional reparte los 350 escaños con el voto de toda España y sin umbral.</p>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <p id="fuentes" class="muted small"></p>
+  </footer>
+
+  <script src="data/elecciones.js"></script>
+  <script src="js/electoral.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

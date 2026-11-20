@@ -1,0 +1,7 @@
+{
+  "name": "simulador-dhondt",
+  "version": "1.0.0",
+  "description": "Simulador del reparto de escaños del Congreso con la ley D'Hondt",
+  "scripts": { "build": "node scripts/build_data.js", "test": "node tests/run.js" },
+  "license": "MIT"
+}

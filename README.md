@@ -1,0 +1,67 @@
+# Simulador D'Hondt del Congreso
+
+Web app para simular el reparto de los 350 escaños del Congreso de los Diputados por circunscripción. Partes de los votos reales de unas elecciones generales, los cambias con deslizadores provincia a provincia y ves al momento cuántos escaños saca cada partido con la ley D'Hondt y con otros sistemas.
+
+## Qué hace
+
+- **Mapa de las 52 circunscripciones** (50 provincias + Ceuta y Melilla). Cada casilla muestra los escaños de la provincia y cómo se reparten. Se puede colorear por partido más votado, por provincias donde tus cambios alteran el resultado, o por el porcentaje de un partido.
+- **Deslizadores de votos** para cada candidatura, para el voto en blanco (cuenta para el umbral) y para «otras candidaturas».
+- **Pistas por partido**: cuántos votos le faltan para el siguiente escaño y cuántos puede perder sin perder ninguno.
+- **Tabla de cocientes D'Hondt** de la provincia, con el último escaño repartido y el primer cociente que se queda fuera.
+- **Mover votos** de un partido a otro (o a blanco/abstención), en una provincia o en toda España.
+- **Cambiar el número de escaños** de una provincia y el **umbral** (3 % por defecto).
+- **Con y sin D'Hondt**: con los mismos votos, compara el resultado real, D'Hondt, Sainte-Laguë, Hare (restos mayores) por provincia y un reparto proporcional en circunscripción única nacional.
+
+## Datos incluidos
+
+| Elección | Fuente |
+|---|---|
+| 23 de julio de 2023 | BOE-A-2023-18907, resumen oficial de la Junta Electoral Central |
+| 10 de noviembre de 2019 | Resultados por provincia publicados por Público (escrutinio 100 %) |
+
+Las pruebas (`tests/run.js`) comprueban que, con estos votos, D'Hondt reproduce exactamente los escaños oficiales en las 52 circunscripciones de ambas elecciones y que los totales de 2023 coinciden con el BOE.
+
+Notas: el PSC se cuenta como PSOE; en 2019, Unidas Podemos incluye sus confluencias y Más País incluye Compromís. Las candidaturas pequeñas sin opción a escaño se agrupan en «otras candidaturas» (no compiten por escaño en el simulador).
+
+## Usarlo
+
+No necesita instalación ni servidor: abre `index.html` en el navegador.
+
+### Publicarlo en GitHub Pages
+
+1. Crea un repositorio vacío en GitHub (por ejemplo `simulador-dhondt`).
+2. Desde esta carpeta:
+   ```bash
+   git remote add origin https://github.com/TU_USUARIO/simulador-dhondt.git
+   git push -u origin main
+   ```
+3. En GitHub: **Settings → Pages → Build and deployment → Deploy from a branch → `main` / `(root)`**. En un minuto estará en `https://TU_USUARIO.github.io/simulador-dhondt/`.
+
+## Añadir otra elección
+
+1. Crea `data/raw/g2016.txt` con una línea por circunscripción:
+   ```
+   Provincia|votos_validos|votos_en_blanco|PARTIDO:votos:escaños;PARTIDO:votos:escaños;...
+   ```
+   (los nombres de provincia y siglas aceptados están en `scripts/build_data.js`).
+2. Añádela a la lista `ELECCIONES` de `scripts/build_data.js` y, si hace falta, sus partidos en `PARTIDOS`.
+3. Ejecuta `node scripts/build_data.js` y `node tests/run.js`. Si las pruebas pasan, los datos reproducen los escaños oficiales.
+
+## Estructura
+
+```
+index.html            página
+css/styles.css        estilos (modo claro y oscuro)
+js/electoral.js       motor de reparto: D'Hondt, Sainte-Laguë, Hare, umbral, votos para el siguiente escaño
+js/app.js             interfaz: mapa, hemiciclo, deslizadores, tablas
+data/raw/*.txt        datos fuente por elección
+data/elecciones.js    datos generados (no editar a mano)
+scripts/build_data.js genera data/elecciones.js
+tests/run.js          pruebas (node tests/run.js)
+```
+
+## Sobre el mapa
+
+El mapa usa una casilla por circunscripción, todas del mismo tamaño y colocadas aproximadamente en su posición geográfica. Así Ceuta, Melilla o Soria se pueden tocar igual que Madrid, lo que en un mapa real sería difícil en el móvil. Para el reparto no hace falta más detalle geográfico: la unidad electoral del Congreso es la provincia.
+
+Licencia: MIT.
