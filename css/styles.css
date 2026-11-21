@@ -63,11 +63,11 @@ button, select, input { font: inherit; color: inherit; }
 /* Rejilla */
 .layout { max-width: 1280px; margin: 0 auto; padding: 16px; display: grid; gap: 16px;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-  grid-template-areas: "resumen panel" "mapa panel" "encuesta panel" "comp comp" "explica explica"; }
+  grid-template-areas: "resumen panel" "mapa panel" "encuesta panel" "comp comp"; }
 .resumen { grid-area: resumen; } .mapa { grid-area: mapa; } .panel { grid-area: panel; }
-.comparativa { grid-area: comp; } .encuesta { grid-area: encuesta; } .explica { grid-area: explica; }
+.comparativa { grid-area: comp; } .encuesta { grid-area: encuesta; }
 @media (max-width: 900px) {
-  .layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "resumen" "mapa" "panel" "encuesta" "comp" "explica"; }
+  .layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "resumen" "mapa" "panel" "encuesta" "comp"; }
 }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 12px; align-content: start; min-width: 0; }
 .card-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 12px; }
@@ -160,3 +160,85 @@ thead th { font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; 
 .enc-item { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 6px; font-size: .88rem; }
 .enc-item input { width: 64px; border: 1px solid var(--line); background: var(--paper); border-radius: 6px; padding: 5px 6px; text-align: right; font-variant-numeric: tabular-nums; }
 .enc-acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ---------- Parte educativa ---------- */
+:root { --ok: #1E8A4C; --ko: #C0392B; --hl: #F2B829; }
+:root[data-theme="dark"] { --ok: #5BD48C; --ko: #FF7B6E; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ok: #5BD48C; --ko: #FF7B6E; } }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-mini { min-height: 28px; padding: 2px 8px; font-size: .8rem; margin-left: 6px; }
+.guia { position: sticky; top: 0; z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.guia-inner { max-width: 1280px; margin: 0 auto; padding: 8px 16px; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.guia-paso { white-space: nowrap; text-decoration: none; color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; font-size: .88rem; display: inline-flex; gap: 6px; align-items: center; }
+.guia-paso b { background: var(--accent); color: var(--surface); border-radius: 50%; width: 20px; height: 20px; display: inline-grid; place-items: center; font-size: .75rem; }
+.guia-paso:hover { border-color: var(--accent); }
+html { scroll-behavior: smooth; scroll-padding-top: 56px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+.ancho { max-width: 1280px; margin: 0 auto; padding: 16px 16px 0; display: grid; gap: 16px; }
+.layout + .ancho { padding-top: 0; padding-bottom: 16px; }
+.intro { display: grid; gap: 6px; }
+.intro-titulo { font-size: 1.6rem; }
+.intro p { margin: 0; max-width: 75ch; font-size: 1.02rem; }
+.num-paso { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--surface); font-size: .9rem; margin-right: 6px; vertical-align: 2px; }
+.seccion-titulo h2 { font-size: 1.35rem; }
+.seccion-titulo p { margin: 4px 0 0; color: var(--muted); }
+.saber summary, .reto details summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+.saber p { margin: 6px 0 0; max-width: 75ch; }
+.destacado { margin: 0; font-size: 1rem; }
+
+/* Laboratorio */
+.lab-grid { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 760px) { .lab-grid { grid-template-columns: minmax(0, 1fr); } }
+.lab-datos, .lab-tabla { display: grid; gap: 12px; min-width: 0; }
+.lab-partidos { display: grid; gap: 6px; }
+.lab-partido { display: grid; grid-template-columns: auto 1fr 110px; gap: 8px; align-items: center; }
+.lab-partido input { border: 1px solid var(--line); background: var(--paper); border-radius: 6px; padding: 6px; text-align: right; font-variant-numeric: tabular-nums; width: 100%; }
+.lab-escanos { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.lab-botones { display: flex; flex-wrap: wrap; gap: 8px; }
+.lab-asientos { display: flex; flex-wrap: wrap; gap: 6px; }
+.asiento { width: 34px; height: 34px; border-radius: 50% 50% 6px 6px; border: 2px dashed var(--line); display: grid; place-items: center; font-size: .8rem; color: var(--muted); font-weight: 600; }
+.asiento.lleno { border: 2px solid transparent; color: #fff; }
+.lab-cocientes td { font-size: .9rem; }
+.lab-cocientes td sup { font-size: .68rem; font-weight: 700; }
+.cocientes td.candidato { box-shadow: inset 0 0 0 2px var(--hl); background: color-mix(in srgb, var(--hl) 18%, transparent); color: var(--ink); }
+.lab-explica { display: grid; gap: 8px; background: var(--paper); border-radius: 8px; padding: 12px; }
+.lab-explica p { margin: 0; }
+.lab-final { display: grid; gap: 8px; }
+
+/* Valor del voto */
+.valor-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+.valor-grid > div { display: grid; gap: 10px; align-content: start; }
+.barras { display: grid; gap: 5px; }
+.barra { display: grid; grid-template-columns: 120px 1fr 72px; gap: 8px; align-items: center; font-size: .85rem; }
+.barra.sel .barra-nombre { font-weight: 700; }
+.barra-nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.barra-pista { height: 12px; background: var(--paper); border-radius: 3px; overflow: hidden; }
+.barra-relleno { display: block; height: 100%; border-radius: 3px; }
+.barra-valor { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+
+/* Retos */
+.retos-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.reto { display: grid; grid-template-columns: 34px 1fr; gap: 10px; border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+.reto.hecho { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 7%, transparent); }
+.reto-estado { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--paper); font-weight: 700; color: var(--muted); }
+.reto.hecho .reto-estado { background: var(--ok); color: #fff; }
+.reto-cuerpo { display: grid; gap: 6px; align-content: start; justify-items: start; }
+.reto-cuerpo p { margin: 0; }
+.reto-exito { color: var(--ok); font-weight: 500; }
+
+/* Test */
+.test-lista { margin: 0; padding-left: 1.3em; display: grid; gap: 14px; }
+.preg { margin: 0 0 6px; font-weight: 600; }
+.opciones { display: flex; flex-wrap: wrap; gap: 6px; }
+.opcion { border: 1px solid var(--line); background: var(--paper); border-radius: 8px; padding: 8px 12px; cursor: pointer; text-align: left; min-height: 40px; }
+.opcion:hover { border-color: var(--accent); }
+.opcion.correcta { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 15%, transparent); }
+.opcion.incorrecta { border-color: var(--ko); background: color-mix(in srgb, var(--ko) 12%, transparent); }
+.feedback { margin: 6px 0 0; font-size: .9rem; }
+.feedback.bien { color: var(--ok); } .feedback.mal { color: var(--ko); }
+
+/* Glosario */
+.glos { margin: 0; display: grid; grid-template-columns: minmax(140px, 220px) 1fr; gap: 8px 16px; }
+.glos dt { font-weight: 600; }
+.glos dd { margin: 0; color: var(--muted); }
+@media (max-width: 600px) { .glos { grid-template-columns: 1fr; } .glos dd { margin-bottom: 6px; } }

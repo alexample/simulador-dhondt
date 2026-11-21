@@ -2,6 +2,15 @@
 
 Web app para simular el reparto de los 350 escaños del Congreso de los Diputados por circunscripción. Partes de los votos reales de unas elecciones generales, los cambias con deslizadores provincia a provincia y ves al momento cuántos escaños saca cada partido con la ley D'Hondt y con otros sistemas.
 
+## Para aprender (pensado también para clase y para adolescentes)
+
+1. **Laboratorio**: una provincia inventada con partidos ficticios. Repartes los escaños uno a uno y cada paso explica por qué gana ese partido. Al final compara D'Hondt con un reparto proporcional.
+2. **Simula**: el Congreso real con el mapa y los deslizadores.
+3. **¿Cuánto vale tu voto?**: votos por escaño según la provincia y según el partido.
+4. **Retos**: seis misiones que se comprueban solas (romper el bipartidismo en Soria, decidir un escaño con menos de 2.000 votos, quitar el umbral, conseguir una mayoría absoluta…).
+5. **Ponte a prueba**: test de 8 preguntas con explicación de cada respuesta.
+6. **Glosario** con los términos básicos.
+
 ## Qué hace
 
 - **Mapa de las 52 circunscripciones** (50 provincias + Ceuta y Melilla). Cada casilla muestra los escaños de la provincia y cómo se reparten. Se puede colorear por partido más votado, por provincias donde tus cambios alteran el resultado, o por el porcentaje de un partido.
@@ -16,6 +25,7 @@ Web app para simular el reparto de los 350 escaños del Congreso de los Diputado
 
 | Elección | Fuente |
 |---|---|
+| 29 de noviembre de 2026 (escenario) | Escaños: Real Decreto 806/2026. Candidaturas: BOE 3-nov-2026 y prensa. Votos de partida: estructura provincial del 23J ajustada a la media de encuestas de Demócrata |
 | 23 de julio de 2023 | BOE-A-2023-18907, resumen oficial de la Junta Electoral Central |
 | 10 de noviembre de 2019 | Resultados por provincia publicados por Público (escrutinio 100 %) |
 

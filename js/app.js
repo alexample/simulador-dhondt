@@ -407,20 +407,31 @@
     }
     return { v, val };
   }
-  // Reescala los votos de cada partido en todas sus provincias (mismo factor) hasta su % nacional.
+  // Lleva cada partido a su % nacional multiplicando sus votos por el mismo factor en todas sus
+  // provincias. La participación de cada provincia no cambia: la diferencia se compensa
+  // reescalando a los demás partidos (y «otras candidaturas») de esa provincia.
   function ajustarNacional(objetivos) {
-    for (let it = 0; it < 40; it++) {
+    const fijar = (c, k, nuevo) => {
+      const resto = Object.entries(c.votos).filter(([p]) => p !== k).reduce((a, [, v]) => a + v, 0) + c.otros;
+      nuevo = Math.min(Math.max(0, nuevo), (c.votos[k] || 0) + resto);
+      const g = resto ? (resto - (nuevo - (c.votos[k] || 0))) / resto : 1;
+      for (const p of Object.keys(c.votos)) if (p !== k) c.votos[p] = Math.round(c.votos[p] * g);
+      c.otros = Math.round(c.otros * g);
+      c.votos[k] = Math.round(nuevo);
+    };
+    for (let it = 0; it < 60; it++) {
       for (const [k, pct] of Object.entries(objetivos)) {
         const t = Math.min(Math.max(pct, 0), 95) / 100;
         const { v, val } = totalesNacionales();
         const actual = v[k] || 0;
+        const deseado = t * val;
+        if (Math.abs(deseado - actual) < 1) continue;
         if (!actual) {
-          if (!t) continue;
-          for (const c of Object.values(state.circ)) if (k in c.votos) c.votos[k] = Math.round(t * E.validos(c));
+          for (const c of Object.values(state.circ)) if (k in c.votos) fijar(c, k, t * E.validos(c));
           continue;
         }
-        const f = (t * (val - actual)) / (1 - t) / actual;
-        for (const c of Object.values(state.circ)) if (k in c.votos) c.votos[k] = Math.round(c.votos[k] * f);
+        const f = deseado / actual;
+        for (const c of Object.values(state.circ)) if (k in c.votos) fijar(c, k, c.votos[k] * f);
       }
     }
   }
@@ -432,7 +443,8 @@
     cont.replaceChildren(...lista.map((p) => el('label', { class: 'enc-item', for: 'enc-' + p },
       el('span', { class: 'dot', style: `background:${P(p).color}` }), el('span', { text: P(p).corto }),
       el('span', { class: 'with-unit' }, el('input', { type: 'number', id: 'enc-' + p, 'data-p': p, min: 0, max: 60, step: 0.1,
-        value: (100 * v[p] / val).toFixed(1) }), el('em', { text: '%' })))));
+        value: (100 * v[p] / val).toFixed(1), 'data-orig': (100 * v[p] / val).toFixed(1) }), el('em', { text: '%' })))));
+    $('#encuesta-aviso').textContent = '';
     $('#btn-encuesta-media').hidden = !elActual().encuesta;
     $('#encuesta-nota').textContent = esEscenario() ? (elActual().nota || '') : 'Porcentajes sobre votos válidos en toda España.';
   }
@@ -464,12 +476,14 @@
   }
 
   // ---------- Orquestación ----------
+  const oyentes = [];
   function actualizar() {
     calcular();
     renderHemiciclo();
     renderMapa();
     renderTabla();
     actualizarPanel();
+    for (const f of oyentes) { try { f(state); } catch (e) { console.error(e); } }
   }
   function seleccionar(ine) {
     state.sel = ine;
@@ -499,8 +513,12 @@
     });
     $('#btn-reset-todo').addEventListener('click', () => { cargarEleccion(state.eleccion); construirPanel(); actualizar(); construirEncuesta(); });
     $('#btn-encuesta').addEventListener('click', () => {
+      // Solo se fijan los partidos cuyo % has cambiado; el resto se reparte lo que queda en proporción.
       const obj = {};
-      document.querySelectorAll('#encuesta-filas input').forEach((i) => { if (i.value !== '') obj[i.dataset.p] = Number(i.value); });
+      document.querySelectorAll('#encuesta-filas input').forEach((i) => { if (i.value !== '' && i.value !== i.dataset.orig) obj[i.dataset.p] = Number(i.value); });
+      const suma = Object.values(obj).reduce((a, b) => a + b, 0);
+      if (!Object.keys(obj).length) { $('#encuesta-aviso').textContent = 'Cambia primero el % de algún partido.'; return; }
+      if (suma > 97) { $('#encuesta-aviso').textContent = `Los porcentajes que has cambiado suman ${suma.toFixed(1)} %: deja sitio para el resto.`; return; }
       aplicarEncuesta(obj);
     });
     $('#btn-encuesta-media').addEventListener('click', () => { cargarEleccion(state.eleccion); construirPanel(); actualizar(); construirEncuesta(); });
@@ -516,6 +534,13 @@
 
     cargarEleccion(state.eleccion);
     opcionesPartidoMapa();
+    window.Simulador = {
+      state, P, original, elActual, seleccionar,
+      onUpdate: (f) => { oyentes.push(f); f(state); },
+      setMetodo: (m) => { state.metodo = m; $('#sel-metodo').value = m; actualizar(); },
+      setUmbral: (u) => { state.umbral = u; $('#inp-umbral').value = u; actualizar(); },
+      irAlPanel: () => $('#panel').scrollIntoView({ behavior: 'smooth', block: 'start' }),
+    };
     construirPanel();
     actualizar();
     construirEncuesta();

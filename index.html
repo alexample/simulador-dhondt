@@ -40,6 +40,69 @@
     </div>
   </header>
 
+  <nav class="guia" aria-label="Secciones">
+    <div class="guia-inner">
+      <a class="guia-paso" href="#aprende"><b>1</b> Aprende</a>
+      <a class="guia-paso" href="#simula"><b>2</b> Simula</a>
+      <a class="guia-paso" href="#valor"><b>3</b> ¿Cuánto vale tu voto?</a>
+      <a class="guia-paso" href="#retos"><b>4</b> Retos</a>
+      <a class="guia-paso" href="#test"><b>5</b> Ponte a prueba</a>
+      <a class="guia-paso" href="#glosario">Glosario</a>
+    </div>
+  </nav>
+
+  <div class="ancho">
+    <section class="intro">
+      <h2 class="intro-titulo">¿Cómo se convierten los votos en diputados?</h2>
+      <p>En España no gana el que más votos tiene en todo el país, sino el que consigue más <strong>escaños</strong>: los 350 asientos del Congreso. Cada provincia reparte los suyos con una fórmula matemática llamada <strong>ley D'Hondt</strong>. Aquí puedes aprenderla jugando: primero con una provincia inventada, después con los votos reales de toda España.</p>
+    </section>
+
+    <section class="card lab" id="aprende" aria-labelledby="h-lab">
+      <div class="card-head">
+        <h2 id="h-lab"><span class="num-paso">1</span> Laboratorio: reparte los escaños tú mismo</h2>
+        <p class="muted small">Provincia inventada de <b>Villaescaños</b>. Partidos ficticios.</p>
+      </div>
+      <div class="lab-grid">
+        <div class="lab-datos">
+          <h3>Votos de cada partido</h3>
+          <div id="lab-partidos" class="lab-partidos"></div>
+          <div class="lab-escanos">
+            <span>Escaños a repartir</span>
+            <div class="stepper">
+              <button type="button" id="lab-menos" aria-label="Un escaño menos">−</button>
+              <output id="lab-n">5</output>
+              <button type="button" id="lab-mas" aria-label="Un escaño más">+</button>
+            </div>
+          </div>
+          <div class="lab-botones">
+            <button type="button" class="btn btn-primary" id="lab-siguiente">Repartir el siguiente escaño</button>
+            <button type="button" class="btn" id="lab-todos">Repartir todos</button>
+            <button type="button" class="btn btn-ghost" id="lab-reset">Empezar de nuevo</button>
+          </div>
+        </div>
+        <div class="lab-tabla">
+          <div id="lab-escanos" class="lab-asientos" aria-live="polite"></div>
+          <div class="table-wrap"><table id="lab-cocientes" class="cocientes lab-cocientes"></table></div>
+          <div id="lab-explica" class="lab-explica" aria-live="polite"></div>
+        </div>
+      </div>
+      <details class="saber">
+        <summary>La regla en tres pasos</summary>
+        <ol class="pasos">
+          <li>Divide los votos de cada partido entre 1, 2, 3, 4… (tantas veces como escaños haya).</li>
+          <li>Ordena todos los resultados (los <em>cocientes</em>) de mayor a menor.</li>
+          <li>Los escaños son para los cocientes más altos. Si un partido tiene 3 de esos cocientes, gana 3 escaños.</li>
+        </ol>
+        <p>Truco para entenderlo: cada vez que un partido gana un escaño, sus votos «se dividen» entre más diputados, así que le cuesta más ganar el siguiente. Por eso los partidos pequeños a veces no llegan a ninguno.</p>
+      </details>
+    </section>
+
+    <div class="seccion-titulo" id="simula">
+      <h2><span class="num-paso">2</span> Simula el Congreso real</h2>
+      <p>Elige unas elecciones, toca una provincia del mapa y mueve los votos. Todo se recalcula al momento.</p>
+    </div>
+  </div>
+
   <main class="layout">
     <section class="card resumen" aria-labelledby="h-resumen">
       <div class="card-head">
@@ -69,12 +132,13 @@
         <h2 id="h-encuesta">Ajustar a porcentajes nacionales</h2>
         <p id="encuesta-nota" class="muted small"></p>
       </div>
-      <p class="muted small" style="margin:0">Escribe el % nacional que quieres para cada partido. Sus votos se reescalan por igual en todas las provincias donde se presenta, manteniendo su reparto territorial.</p>
+      <p class="muted small" style="margin:0">Cambia el % nacional de uno o varios partidos y pulsa Aplicar. Sus votos suben o bajan por igual en todas sus provincias; los demás partidos se ajustan en proporción para que la participación no cambie.</p>
       <div id="encuesta-filas" class="enc-grid"></div>
       <div class="enc-acciones">
         <button id="btn-encuesta" type="button" class="btn btn-primary">Aplicar porcentajes</button>
         <button id="btn-encuesta-media" type="button" class="btn">Volver a la estimación inicial</button>
       </div>
+      <p id="encuesta-aviso" class="aviso" aria-live="polite"></p>
     </section>
 
     <section class="card panel" aria-labelledby="h-prov" id="panel">
@@ -83,23 +147,58 @@
 
     <section class="card comparativa" aria-labelledby="h-comp">
       <div class="card-head">
-        <h2 id="h-comp">Con y sin D'Hondt</h2>
-        <p class="muted small">Mismos votos simulados, distintos sistemas. «Real» es el resultado oficial de la elección base («Inicial» en el escenario 29N).</p>
+        <h2 id="h-comp">¿Y sin la ley D'Hondt?</h2>
+        <p class="muted small">Con exactamente los mismos votos, otros sistemas darían otro Congreso. Compara columnas: ¿quién gana y quién pierde con cada uno? «Real» es el resultado oficial («Inicial» en el escenario 29N).</p>
       </div>
       <div class="table-wrap"><table id="tabla" class="tabla"></table></div>
     </section>
 
-    <section class="card explica" aria-labelledby="h-explica">
-      <h2 id="h-explica">Cómo funciona</h2>
-      <ol class="pasos">
-        <li>Cada provincia elige sus propios diputados (Ceuta y Melilla, uno cada una). Los votos no se suman entre provincias.</li>
-        <li>Solo entran en el reparto las candidaturas con al menos el 3 % de los votos válidos de la provincia (los votos en blanco cuentan como válidos).</li>
-        <li>Los votos de cada candidatura se dividen entre 1, 2, 3… y los escaños se dan a los cocientes más altos. Es la tabla que verás en cada provincia.</li>
-        <li>Como en las provincias pequeñas hay pocos escaños, el sistema favorece a los partidos más votados y a los que concentran su voto en un territorio.</li>
-      </ol>
-      <p class="muted small">Sainte-Laguë divide entre 1, 3, 5… y trata mejor a los partidos medianos. Hare reparte por cuota y restos mayores. La circunscripción única nacional reparte los 350 escaños con el voto de toda España y sin umbral.</p>
-    </section>
+
   </main>
+
+  <div class="ancho">
+    <section class="card valor" id="valor" aria-labelledby="h-valor">
+      <div class="card-head">
+        <h2 id="h-valor"><span class="num-paso">3</span> ¿Cuánto vale tu voto?</h2>
+        <p class="muted small">Se calcula con los votos que tengas ahora en el simulador.</p>
+      </div>
+      <div class="valor-grid">
+        <div>
+          <h3>Según la provincia donde votas</h3>
+          <p id="valor-frase" class="destacado"></p>
+          <div id="valor-prov" class="barras"></div>
+          <p class="muted small">Votos válidos que hay por cada escaño de la provincia. Cuantos menos votos por escaño, más «pesa» cada voto. Ocurre porque cada provincia tiene al menos 2 diputados aunque tenga poca población.</p>
+        </div>
+        <div>
+          <h3>Según el partido al que votas</h3>
+          <p id="valor-frase-p" class="destacado"></p>
+          <div id="valor-part" class="barras"></div>
+          <p class="muted small">Votos que necesita cada partido para conseguir un escaño (sus votos en toda España ÷ sus escaños con D'Hondt). A los partidos con voto repartido por todo el país les sale más caro; a los grandes y a los concentrados en pocas provincias, más barato.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card retos" id="retos" aria-labelledby="h-retos">
+      <div class="card-head">
+        <h2 id="h-retos"><span class="num-paso">4</span> Retos</h2>
+        <p class="muted small"><span id="retos-cuenta">0</span> de <span id="retos-total">0</span> superados. Se comprueban solos mientras usas el simulador.</p>
+      </div>
+      <ol id="retos-lista" class="retos-lista"></ol>
+    </section>
+
+    <section class="card test" id="test" aria-labelledby="h-test">
+      <div class="card-head">
+        <h2 id="h-test"><span class="num-paso">5</span> Ponte a prueba</h2>
+        <p class="muted small" id="test-nota">Elige una respuesta en cada pregunta.</p>
+      </div>
+      <ol id="test-lista" class="test-lista"></ol>
+    </section>
+
+    <section class="card glosario" id="glosario" aria-labelledby="h-glos">
+      <h2 id="h-glos">Glosario</h2>
+      <dl id="glos-lista" class="glos"></dl>
+    </section>
+  </div>
 
   <footer class="pie">
     <p id="fuentes" class="muted small"></p>
@@ -108,5 +207,6 @@
   <script src="data/elecciones.js"></script>
   <script src="js/electoral.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/aprende.js"></script>
 </body>
 </html>
