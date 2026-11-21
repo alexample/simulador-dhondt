@@ -31,7 +31,8 @@
   const METODOS = { dhondt: "D'Hondt", sainte: 'Sainte-Laguë', hare: 'Hare provincial', nacional: 'Nacional proporcional' };
   const P = (k) => D.partidos[k] || { nombre: k, corto: k, color: '#888' };
 
-  const state = { eleccion: Object.keys(D.elecciones)[0], metodo: 'dhondt', umbral: 3, sel: '28', mapa: 'ganador', partidoMapa: 'PP', circ: {}, res: null };
+  const ORDEN_EL = D.orden || Object.keys(D.elecciones);
+  const state = { eleccion: ORDEN_EL[0], metodo: 'dhondt', umbral: 3, sel: '28', mapa: 'ganador', partidoMapa: 'PP', circ: {}, res: null };
 
   function cargarEleccion(id) {
     state.eleccion = id;
@@ -41,6 +42,10 @@
     }
   }
   const original = (ine) => D.elecciones[state.eleccion].provincias[ine];
+  const elActual = () => D.elecciones[state.eleccion];
+  const esEscenario = () => !!elActual().escenario;
+  const etiqueta = (ine, p) => ((elActual().etiquetas || {})[ine] || {})[p];
+  const refNombre = () => esEscenario() ? 'estimación inicial' : 'resultado real';
 
   // ---------- Cálculo ----------
   function calcular() {
@@ -118,7 +123,7 @@
     });
     const editado = Object.keys(state.circ).some(esEditada);
     $('#resumen-nota').textContent = `${METODOS[state.metodo]} · ${D.elecciones[state.eleccion].corto}` +
-      (editado ? ' · con tus cambios' : ' · votos reales') + ' · diferencias frente al resultado real';
+      (editado ? ' · con tus cambios' : esEscenario() ? ' · estimación inicial' : ' · votos reales') + ' · diferencias frente al ' + refNombre();
   }
 
   function esEditada(ine) {
@@ -227,13 +232,13 @@
     const filas = el('div', { class: 'filas' });
     const partidos = Object.keys(o.votos).sort((a, b) => o.votos[b] - o.votos[a]);
     const validosOrig = E.validos(o);
-    for (const p of partidos) filas.append(filaVotos(p, P(p).nombre, P(p).color, Math.max(o.votos[p] * 2, validosOrig * 0.4), true));
+    for (const p of partidos) filas.append(filaVotos(p, etiqueta(ine, p) ? `${etiqueta(ine, p)} (${P(p).corto})` : P(p).nombre, P(p).color, Math.max(o.votos[p] * 2, validosOrig * 0.4), true));
     filas.append(filaVotos('_blanco', 'Votos en blanco', '#9AA3B2', Math.max(o.blanco * 4, validosOrig * 0.05), false));
     filas.append(filaVotos('_otros', 'Otras candidaturas (no compiten por escaño)', '#7D8594', Math.max(o.otros * 4, validosOrig * 0.05), false));
     panel.append(filas);
 
     // Transferencia de votos
-    const opts = () => [...partidos.map((p) => [p, P(p).corto]), ['_blanco', 'En blanco'], ['_otros', 'Otros'], ['_abst', 'Abstención']];
+    const opts = () => [...partidos.map((p) => [p, etiqueta(ine, p) || P(p).corto]), ['_blanco', 'En blanco'], ['_otros', 'Otros'], ['_abst', 'Abstención']];
     const selDe = el('select', { id: 'tr-de' }, ...opts().filter((x) => x[0] !== '_abst').map(([v, t]) => el('option', { value: v, text: t })));
     const selA = el('select', { id: 'tr-a' }, ...opts().map(([v, t]) => el('option', { value: v, text: t })));
     if (partidos[1]) selA.value = partidos[1];
@@ -393,10 +398,53 @@
       (saltadas ? ` (${saltadas} circunscripciones omitidas porque alguno de los dos no se presentaba)` : '') + '.';
   }
 
+  // ---------- Ajuste a porcentajes nacionales ----------
+  function totalesNacionales() {
+    const v = {}; let val = 0;
+    for (const c of Object.values(state.circ)) {
+      val += E.validos(c);
+      for (const [p, n] of Object.entries(c.votos)) v[p] = (v[p] || 0) + n;
+    }
+    return { v, val };
+  }
+  // Reescala los votos de cada partido en todas sus provincias (mismo factor) hasta su % nacional.
+  function ajustarNacional(objetivos) {
+    for (let it = 0; it < 40; it++) {
+      for (const [k, pct] of Object.entries(objetivos)) {
+        const t = Math.min(Math.max(pct, 0), 95) / 100;
+        const { v, val } = totalesNacionales();
+        const actual = v[k] || 0;
+        if (!actual) {
+          if (!t) continue;
+          for (const c of Object.values(state.circ)) if (k in c.votos) c.votos[k] = Math.round(t * E.validos(c));
+          continue;
+        }
+        const f = (t * (val - actual)) / (1 - t) / actual;
+        for (const c of Object.values(state.circ)) if (k in c.votos) c.votos[k] = Math.round(c.votos[k] * f);
+      }
+    }
+  }
+  function construirEncuesta() {
+    const cont = $('#encuesta-filas');
+    const { v, val } = totalesNacionales();
+    const lista = Object.keys(v).filter((p) => v[p] / val >= 0.004 || v[p] === 0 || (elActual().encuesta || {})[p] != null)
+      .sort((a, b) => v[b] - v[a]);
+    cont.replaceChildren(...lista.map((p) => el('label', { class: 'enc-item', for: 'enc-' + p },
+      el('span', { class: 'dot', style: `background:${P(p).color}` }), el('span', { text: P(p).corto }),
+      el('span', { class: 'with-unit' }, el('input', { type: 'number', id: 'enc-' + p, 'data-p': p, min: 0, max: 60, step: 0.1,
+        value: (100 * v[p] / val).toFixed(1) }), el('em', { text: '%' })))));
+    $('#btn-encuesta-media').hidden = !elActual().encuesta;
+    $('#encuesta-nota').textContent = esEscenario() ? (elActual().nota || '') : 'Porcentajes sobre votos válidos en toda España.';
+  }
+  function aplicarEncuesta(valores) {
+    ajustarNacional(valores);
+    construirPanel(); actualizar(); construirEncuesta();
+  }
+
   // ---------- Comparativa ----------
   function renderTabla() {
     const r = state.res;
-    const cols = [['real', 'Real'], ['dhondt', "D'Hondt"], ['sainte', 'Sainte-Laguë'], ['hare', 'Hare provincial'], ['nacional', 'Nacional proporcional']];
+    const cols = [['real', esEscenario() ? 'Inicial' : 'Real'], ['dhondt', "D'Hondt"], ['sainte', 'Sainte-Laguë'], ['hare', 'Hare provincial'], ['nacional', 'Nacional proporcional']];
     const partidos = Object.keys(r.votos).filter((p) => cols.some(([k]) => r.tot[k][p]) || r.votos[p] / r.validos > 0.005)
       .sort((a, b) => r.votos[b] - r.votos[a]);
     const t = $('#tabla');
@@ -442,14 +490,20 @@
 
   function init() {
     const selE = $('#sel-eleccion');
-    for (const [id, e] of Object.entries(D.elecciones)) selE.append(el('option', { value: id, text: e.nombre }));
-    selE.addEventListener('change', () => { cargarEleccion(selE.value); opcionesPartidoMapa(); construirPanel(); actualizar(); });
+    for (const id of ORDEN_EL) selE.append(el('option', { value: id, text: D.elecciones[id].nombre }));
+    selE.addEventListener('change', () => { cargarEleccion(selE.value); opcionesPartidoMapa(); construirPanel(); actualizar(); construirEncuesta(); });
     $('#sel-metodo').addEventListener('change', (ev) => { state.metodo = ev.target.value; actualizar(); });
     $('#inp-umbral').addEventListener('input', (ev) => {
       const v = Number(ev.target.value);
       if (v >= 0 && v <= 50) { state.umbral = v; actualizar(); }
     });
-    $('#btn-reset-todo').addEventListener('click', () => { cargarEleccion(state.eleccion); construirPanel(); actualizar(); });
+    $('#btn-reset-todo').addEventListener('click', () => { cargarEleccion(state.eleccion); construirPanel(); actualizar(); construirEncuesta(); });
+    $('#btn-encuesta').addEventListener('click', () => {
+      const obj = {};
+      document.querySelectorAll('#encuesta-filas input').forEach((i) => { if (i.value !== '') obj[i.dataset.p] = Number(i.value); });
+      aplicarEncuesta(obj);
+    });
+    $('#btn-encuesta-media').addEventListener('click', () => { cargarEleccion(state.eleccion); construirPanel(); actualizar(); construirEncuesta(); });
     document.querySelectorAll('.seg-btn').forEach((b) => b.addEventListener('click', () => {
       state.mapa = b.dataset.mapa;
       document.querySelectorAll('.seg-btn').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
@@ -457,13 +511,14 @@
       renderMapa();
     }));
     $('#sel-partido-mapa').addEventListener('change', (ev) => { state.partidoMapa = ev.target.value; renderMapa(); });
-    $('#fuentes').textContent = 'Fuentes: ' + Object.values(D.elecciones).map((e) => `${e.corto}: ${e.fuente}`).join(' · ') +
+    $('#fuentes').textContent = 'Fuentes: ' + ORDEN_EL.map((id) => `${D.elecciones[id].corto}: ${D.elecciones[id].fuente}`).join(' · ') +
       '. Los votos de candidaturas pequeñas sin opción a escaño se agrupan en «otras candidaturas».';
 
     cargarEleccion(state.eleccion);
     opcionesPartidoMapa();
     construirPanel();
     actualizar();
+    construirEncuesta();
   }
   init();
 })();

@@ -64,6 +64,19 @@
       <p class="muted small">Cada casilla es una circunscripción (todas del mismo tamaño para que se vean bien las pequeñas). La franja inferior muestra sus escaños. Toca una para editar sus votos.</p>
     </section>
 
+    <section class="card encuesta" aria-labelledby="h-encuesta">
+      <div class="card-head">
+        <h2 id="h-encuesta">Ajustar a porcentajes nacionales</h2>
+        <p id="encuesta-nota" class="muted small"></p>
+      </div>
+      <p class="muted small" style="margin:0">Escribe el % nacional que quieres para cada partido. Sus votos se reescalan por igual en todas las provincias donde se presenta, manteniendo su reparto territorial.</p>
+      <div id="encuesta-filas" class="enc-grid"></div>
+      <div class="enc-acciones">
+        <button id="btn-encuesta" type="button" class="btn btn-primary">Aplicar porcentajes</button>
+        <button id="btn-encuesta-media" type="button" class="btn">Volver a la estimación inicial</button>
+      </div>
+    </section>
+
     <section class="card panel" aria-labelledby="h-prov" id="panel">
       <!-- se rellena desde app.js -->
     </section>
@@ -71,7 +84,7 @@
     <section class="card comparativa" aria-labelledby="h-comp">
       <div class="card-head">
         <h2 id="h-comp">Con y sin D'Hondt</h2>
-        <p class="muted small">Mismos votos simulados, distintos sistemas. «Real» es el resultado oficial de la elección base.</p>
+        <p class="muted small">Mismos votos simulados, distintos sistemas. «Real» es el resultado oficial de la elección base («Inicial» en el escenario 29N).</p>
       </div>
       <div class="table-wrap"><table id="tabla" class="tabla"></table></div>
     </section>

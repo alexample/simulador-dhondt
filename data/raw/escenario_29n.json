@@ -1,0 +1,43 @@
+{
+  "id": "2026",
+  "nombre": "Generales 29 de noviembre de 2026 (escenario)",
+  "corto": "29N 2026",
+  "base": "2023",
+  "nota": "Estimación de partida: estructura provincial del 23J 2023 ajustada a la media de encuestas. Edítala libremente.",
+  "fuente": "Escaños por circunscripción: Real Decreto 806/2026 (BOE). Candidaturas: BOE de 3-nov-2026 y prensa. Encuestas: media de Demócrata (20-nov-2026; partidos pequeños, 14-nov-2026)",
+  "escanos": { "28": 38, "11": 8 },
+  "encuesta": {
+    "PP": 31.0, "PSOE": 27.8, "VOX": 19.1, "FA": 6.2, "ERC": 2.5,
+    "PODEMOS": 1.7, "SALF": 1.7, "ADELANTE": 1.7, "JUNTS": 1.4, "BILDU": 1.4
+  },
+  "candidaturas": {
+    "PP":       { "base": ["PP", "UPN"], "donde": "todas" },
+    "PSOE":     { "base": ["PSOE"], "donde": "todas" },
+    "VOX":      { "base": ["VOX"], "donde": "todas" },
+    "FA":       { "base": ["SUMAR", "NC"], "donde": "todas", "excepto": ["51", "52"] },
+    "PODEMOS":  { "base": ["SUMAR"], "donde": "todas", "excepto": ["08", "17", "25", "43", "03", "12", "46", "35", "38", "07"] },
+    "ERC":      { "base": ["ERC"], "donde": ["08", "17", "25", "43"] },
+    "JUNTS":    { "base": ["JUNTS"], "donde": ["08", "17", "25", "43"] },
+    "ALHORA":   { "base": [], "donde": ["08", "17", "25", "43"] },
+    "BILDU":    { "base": ["BILDU"], "donde": ["01", "20", "48", "31"] },
+    "PNV":      { "base": ["PNV", "GBAI"], "donde": ["01", "20", "48", "31"] },
+    "BNG":      { "base": ["BNG"], "donde": ["15", "27", "32", "36"] },
+    "CCA":      { "base": ["CCA"], "donde": ["35", "38"] },
+    "ADELANTE": { "base": [], "donde": ["04", "11", "14", "18", "21", "23", "29", "41"] },
+    "SALF":     { "base": [], "donde": "todas", "excepto": ["17", "25", "01", "20", "48"] },
+    "EXISTE":   { "base": ["EXISTE"], "donde": ["22", "44", "50"] },
+    "SORIAYA":  { "base": ["SORIAYA"], "donde": ["42"] }
+  },
+  "etiquetas": {
+    "PP":  { "31": "UPN-PP" },
+    "PNV": { "31": "Geroa Bai-PNV" },
+    "ERC": { "08": "ERC-Podemos", "17": "ERC-Podemos", "25": "ERC-Podemos", "43": "ERC-Podemos" },
+    "FA":  {
+      "03": "Compromís-Front Valencià", "12": "Compromís-Front Valencià", "46": "Compromís-Front Valencià",
+      "35": "Unidad del Pueblo Canario", "38": "Unidad del Pueblo Canario",
+      "22": "CHA-Frente Amplio", "44": "CHA-Frente Amplio", "50": "CHA-Frente Amplio",
+      "07": "Ara Més-Front Ampli", "08": "Frente Amplio (Comuns)", "17": "Frente Amplio (Comuns)",
+      "25": "Frente Amplio (Comuns)", "43": "Frente Amplio (Comuns)"
+    }
+  }
+}

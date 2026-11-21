@@ -63,11 +63,11 @@ button, select, input { font: inherit; color: inherit; }
 /* Rejilla */
 .layout { max-width: 1280px; margin: 0 auto; padding: 16px; display: grid; gap: 16px;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-  grid-template-areas: "resumen panel" "mapa panel" "comp comp" "explica explica"; }
+  grid-template-areas: "resumen panel" "mapa panel" "encuesta panel" "comp comp" "explica explica"; }
 .resumen { grid-area: resumen; } .mapa { grid-area: mapa; } .panel { grid-area: panel; }
-.comparativa { grid-area: comp; } .explica { grid-area: explica; }
+.comparativa { grid-area: comp; } .encuesta { grid-area: encuesta; } .explica { grid-area: explica; }
 @media (max-width: 900px) {
-  .layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "resumen" "mapa" "panel" "comp" "explica"; }
+  .layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "resumen" "mapa" "panel" "encuesta" "comp" "explica"; }
 }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 12px; align-content: start; min-width: 0; }
 .card-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 12px; }
@@ -154,3 +154,9 @@ thead th { font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; 
 @media (prefers-reduced-motion: no-preference) {
   .tile-bg { transition: fill .15s ease; }
 }
+
+/* Ajuste nacional */
+.enc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px 12px; }
+.enc-item { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 6px; font-size: .88rem; }
+.enc-item input { width: 64px; border: 1px solid var(--line); background: var(--paper); border-radius: 6px; padding: 5px 6px; text-align: right; font-variant-numeric: tabular-nums; }
+.enc-acciones { display: flex; flex-wrap: wrap; gap: 8px; }

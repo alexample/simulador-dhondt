@@ -24,7 +24,7 @@ test('Hare reparte todos los escaños', () => {
   assert.strictEqual(Object.values(r).reduce((a, b) => a + b, 0), 10);
 });
 
-for (const [id, el] of Object.entries(D.elecciones)) {
+for (const [id, el] of Object.entries(D.elecciones).filter(([, e]) => !e.escenario)) {
   test(`${el.corto}: D'Hondt reproduce los escaños oficiales en las 52 circunscripciones`, () => {
     let total = 0;
     for (const [ine, c] of Object.entries(el.provincias)) {
@@ -44,6 +44,17 @@ test('23J 2023: totales nacionales del BOE', () => {
   assert.strictEqual(tot.PSOE, 7821718);
   assert.strictEqual(tot.VOX, 3057000);
   assert.strictEqual(tot.SUMAR, 3044996);
+});
+
+test('29N 2026: 350 escaños con el reparto del Real Decreto 806/2026', () => {
+  const el = D.elecciones['2026'];
+  assert(el.escenario);
+  assert.strictEqual(el.provincias['28'].escanos, 38);
+  assert.strictEqual(el.provincias['11'].escanos, 8);
+  assert.strictEqual(Object.values(el.provincias).reduce((a, c) => a + c.escanos, 0), 350);
+  for (const c of Object.values(el.provincias)) assert(c.otros >= 0);
+  assert.strictEqual(el.provincias['51'].votos.FA, undefined); // Frente Amplio no se presenta en Ceuta
+  assert.strictEqual(el.provincias['08'].votos.PODEMOS, undefined); // Podemos va con ERC en Cataluña
 });
 
 test('votosParaSiguiente: con esos votos se gana el escaño y con uno menos no', () => {

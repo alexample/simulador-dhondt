@@ -72,7 +72,7 @@ const ALIAS = {
 
 const PARTIDOS = {
   PP: { nombre: 'Partido Popular', corto: 'PP', color: '#1E73BE' },
-  PSOE: { nombre: 'PSOE (PSC en Cataluña)', corto: 'PSOE', color: '#E2001A' },
+  PSOE: { nombre: 'PSOE', corto: 'PSOE', color: '#E2001A' },
   VOX: { nombre: 'Vox', corto: 'Vox', color: '#5AC035' },
   SUMAR: { nombre: 'Sumar', corto: 'Sumar', color: '#E5007E' },
   UP: { nombre: 'Unidas Podemos (y confluencias)', corto: 'UP', color: '#6B2C91' },
@@ -105,6 +105,10 @@ const PARTIDOS = {
   MES: { nombre: 'Més Esquerra', corto: 'Més', color: '#D85A2A' },
   CHA: { nombre: 'Chunta Aragonesista', corto: 'CHA', color: '#C23B2E' },
   PPSO: { nombre: 'Plataforma del Pueblo Soriano', corto: 'PPSO', color: '#6E8C5A' },
+  FA: { nombre: 'Frente Amplio (y marcas territoriales)', corto: 'F. Amplio', color: '#D81E6C' },
+  PODEMOS: { nombre: 'Podemos', corto: 'Podemos', color: '#6B2C91' },
+  SALF: { nombre: 'Se Acabó La Fiesta', corto: 'SALF', color: '#5B4E44' },
+  ALHORA: { nombre: 'Alhora', corto: 'Alhora', color: '#E07B39' },
 };
 
 const ELECCIONES = [
@@ -151,6 +155,64 @@ for (const e of ELECCIONES) {
   if (Object.keys(prov).length !== 52) throw new Error(e.id + ': faltan circunscripciones');
   out.elecciones[e.id] = { nombre: e.nombre, corto: e.corto, fuente: e.fuente, provincias: prov };
 }
+
+// ---------- Escenario 29N 2026 ----------
+// Votos de partida = votos del 23J en cada provincia, reescalados para que cada partido
+// alcance su porcentaje nacional en la media de encuestas. Partidos nuevos sin historial
+// (SALF, Adelante en toda Andalucía): mismo porcentaje en cada provincia donde se presentan.
+// Partidos sin dato de encuesta: conservan sus votos del 23J. Alhora empieza en 0.
+const E = require('../js/electoral.js');
+function construirEscenario(cfg) {
+  const base = out.elecciones[cfg.base].provincias;
+  const ines = Object.keys(base);
+  const corre = (c, ine) => (c.donde === 'todas' || c.donde.includes(ine)) && !(c.excepto || []).includes(ine);
+  const val23 = (ine) => E.validos(base[ine]);
+  const valNac = ines.reduce((a, i) => a + val23(i), 0);
+  const votos = {};
+  for (const ine of ines) votos[ine] = {};
+  for (const [k, c] of Object.entries(cfg.candidaturas)) {
+    if (!PARTIDOS[k]) throw new Error('Partido sin definir: ' + k);
+    const donde = ines.filter((i) => corre(c, i));
+    const b = Object.fromEntries(donde.map((i) => [i, c.base.reduce((a, p) => a + (base[i].votos[p] || 0), 0)]));
+    const sumaB = Object.values(b).reduce((a, x) => a + x, 0);
+    const objetivo = cfg.encuesta[k] != null ? (cfg.encuesta[k] / 100) * valNac : null;
+    for (const i of donde) {
+      let v;
+      if (objetivo == null) v = b[i];
+      else if (sumaB > 0) v = (b[i] * objetivo) / sumaB;
+      else { const valDonde = donde.reduce((a, j) => a + val23(j), 0); v = (objetivo * val23(i)) / valDonde; }
+      votos[i][k] = Math.round(v);
+    }
+  }
+  const prov = {};
+  for (const ine of ines) {
+    const val = val23(ine), blanco = base[ine].blanco;
+    let suma = Object.values(votos[ine]).reduce((a, x) => a + x, 0);
+    if (suma > val - blanco) { // no caben: se escalan para no dejar «otros» en negativo
+      const f = (val - blanco) / suma;
+      for (const k of Object.keys(votos[ine])) votos[ine][k] = Math.floor(votos[ine][k] * f);
+      suma = Object.values(votos[ine]).reduce((a, x) => a + x, 0);
+    }
+    const escanos = cfg.escanos[ine] || base[ine].escanos;
+    const c = { escanos, blanco, otros: val - blanco - suma, votos: votos[ine] };
+    c.oficial = E.repartir(c).reparto;
+    prov[ine] = c;
+  }
+  const total = Object.values(prov).reduce((a, c) => a + c.escanos, 0);
+  if (total !== 350) throw new Error('El escenario suma ' + total + ' escaños');
+  const etiquetas = {};
+  for (const [k, m] of Object.entries(cfg.etiquetas || {})) for (const [ine, t] of Object.entries(m)) (etiquetas[ine] ||= {})[k] = t;
+  return { nombre: cfg.nombre, corto: cfg.corto, fuente: cfg.fuente, nota: cfg.nota, escenario: true,
+    encuesta: cfg.encuesta, etiquetas, provincias: prov };
+}
+const cfg29n = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/raw/escenario_29n.json'), 'utf8'));
+out.elecciones = { [cfg29n.id]: construirEscenario(cfg29n), ...out.elecciones };
+const PSC = { '08': 'PSC-PSOE', '17': 'PSC-PSOE', '25': 'PSC-PSOE', '43': 'PSC-PSOE' };
+for (const e of Object.values(out.elecciones)) {
+  e.etiquetas = e.etiquetas || {};
+  for (const [ine, t] of Object.entries(PSC)) (e.etiquetas[ine] ||= {}).PSOE = t;
+}
+out.orden = [cfg29n.id, ...ELECCIONES.map((e) => e.id)];
 
 const js = '// Generado por scripts/build_data.js. No editar a mano: edita data/raw/*.txt\n' +
   'globalThis.DATOS_ELECTORALES = ' + JSON.stringify(out) + ';\n' +
